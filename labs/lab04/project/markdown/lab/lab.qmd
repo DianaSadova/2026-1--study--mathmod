@@ -1,41 +1,3 @@
----
-## Author
-author:
-  name: Садова Диана Алексеевна 
-  degrees: DSc
-  orcid: 0000-0002-0877-7063
-  email: 1132239118@rudn.ru
-  affiliation:
-    - name: Российский университет дружбы народов
-      country: Российская Федерация
-      postal-code: 117198
-      city: Москва
-      address: ул. Миклухо-Маклая, д. 6
-
-## Title
-title: "Модель гармонических колебаний"
-subtitle: "Лабораторная работа №4"
-license: "CC BY"
----
-
-# Цель работы
-
-Решить уравнение гармонических колебаний и построяит фазовый портрет гармонического осциллятора.
-
-# Задание
-
-Построяит фазовый портрет гармонического осциллятора и решение уравнения гармонического осциллятора для следующих случаев: 
-
-1. Колебания гармонического осциллятора без затуханий и без действий внешней силы. 
-
-2. Колебания гармонического осциллятора c затуханием и без действий внешней силы. 
-
-3. Колебания гармонического осциллятора c затуханием и под действием внешней силы. 
-
-На интервале  , шаг - 0.05 с начальными условиями x0 = 0.2, y0 = -0.2
-
-# Выполнение лабораторной работы
-
 ```{julia}
 using Plots
 using DifferentialEquations
@@ -212,7 +174,11 @@ function model3!(du, u, p, t)
     du[1] = u[2]
     du[2] = -7.5 * u[1] - 7.4 * u[2] + 2.2 * cos(0.6 * t)
 end
+```
 
+создаём задачу
+
+```{julia}
 prob3 = ODEProblem(model3!, u0, t)
 ```
 
@@ -267,20 +233,36 @@ p3 = plot(p3_x, p3_phase, layout=(1,2), size=(1000, 400))
 ```{julia}
 t_values = sol3.t
 idx_start = findfirst(t_values .>= 35.0)
+```
 
+Инициализируем переменные
+
+```{julia}
 p3_steady = nothing
 t_steady = nothing
 x_steady = nothing
 dx_steady = nothing
 
 if idx_start !== nothing && idx_start <= length(t_values)
+```
 
+Создаем данные для установившегося режима
+
+```{julia}
     t_steady = sol3.t[idx_start:end]
     x_steady = sol3[idx_start:end, 1]
     dx_steady = sol3[idx_start:end, 2]
+```
 
+Проверяем, что данные не пустые
+
+```{julia}
     if !isempty(x_steady) && !isempty(dx_steady) && length(x_steady) > 1
+```
 
+Фазовый портрет установившегося режима
+
+```{julia}
         p3_steady = plot(x_steady, dx_steady,
             label = "Предельный цикл",
             xlabel = "x",
@@ -311,15 +293,23 @@ plot!(p_all_x, t3, x3, label="Модель 3 (с внешней силой)", lw
 xlabel!(p_all_x, "t")
 ylabel!(p_all_x, "x(t)")
 title!(p_all_x, "Сравнение решений x(t) для всех моделей")
+```
 
+Фазовые портреты всех моделей
+
+```{julia}
 p_all_phase = plot(x1, dx1, label="Модель 1 (без затухания)", lw=2)
 plot!(p_all_phase, x2, dx2, label="Модель 2 (с затуханием)", lw=2)
 plot!(p_all_phase, x3, dx3, label="Модель 3 (с внешней силой)", lw=2)
 xlabel!(p_all_phase, "x")
 ylabel!(p_all_phase, "dx/dt")
 title!(p_all_phase, "Сравнение фазовых портретов")
+```
 
-println("\nОтображение графиков")
+Отображаем все графики вместе (три модели в ряд)
+
+```{julia}
+println("\nОтображение графиков...")
 display(plot(p1, p2, p3, layout=(1,3), size=(1500, 500)))
 ```
 
@@ -356,7 +346,11 @@ try
 catch e
     println("  Ошибка при сохранении case3.png: $e")
 end
+```
 
+Сохраняем сравнительные графики
+
+```{julia}
 try
     savefig(p_all_x, "plots/comparison_x.png")
     println("  Сохранён: plots/comparison_x.png")
@@ -455,16 +449,28 @@ if idx_start !== nothing && idx_start <= length(t_values) &&
 
     println("  Интервал анализа: от $(round(t_steady[1], digits=2)) до $(round(t_steady[end], digits=2)) секунд")
     println("  Количество точек: $(length(x_steady))")
+```
 
+Амплитуда установившихся колебаний
+
+```{julia}
     try
         amp_steady = (maximum(x_steady) - minimum(x_steady)) / 2
         println("  Амплитуда колебаний: $(round(amp_steady, digits=4))")
     catch e
         println("  Не удалось вычислить амплитуду: $e")
     end
+```
 
+Частота колебаний
+
+```{julia}
     try
+```
 
+Находим пересечения нуля
+
+```{julia}
         sign_changes = findall(diff(sign.(x_steady)) .!= 0)
         if !isempty(sign_changes) && length(sign_changes) >= 2
             periods = length(sign_changes) / 2
@@ -482,7 +488,11 @@ if idx_start !== nothing && idx_start <= length(t_values) &&
     catch e
         println("  Не удалось определить частоту: $e")
     end
+```
 
+Максимальное отклонение
+
+```{julia}
     try
         max_x = maximum(abs.(x_steady))
         println("  Максимальное отклонение: $(round(max_x, digits=4))")
@@ -507,14 +517,3 @@ println("ПРОГРАММА УСПЕШНО ЗАВЕРШЕНА")
 println("="^50)
 ```
 
-
-
-
-# Выводы
-
-Решили уравнение гармонических колебаний и построяли фазовый портрет гармонического осциллятора.
-
-# Список литературы{.unnumbered}
-
-::: {#refs}
-:::
